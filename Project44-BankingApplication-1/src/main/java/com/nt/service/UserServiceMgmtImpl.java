@@ -230,7 +230,7 @@ public class UserServiceMgmtImpl implements IUserService {
 				TransactionDto transactionDto = TransactionDto.builder()
 						.accountNumber(debitedUser.getAccountNumber())
 						.amount(credetDebitRequest.getAmount())
-						.transactionType("Debit")
+						.transactionType("DEBIT")
 						.build();
 				transactionService.saveTransaction(transactionDto);
 				
