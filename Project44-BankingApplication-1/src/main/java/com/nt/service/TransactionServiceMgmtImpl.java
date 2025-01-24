@@ -1,11 +1,13 @@
 package com.nt.service;
 
-import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.nt.dto.TransactionDto;
 import com.nt.entity.Transaction;
 import com.nt.repository.ITransactionRepository;
 
+@Component
 public class TransactionServiceMgmtImpl implements ITransactionService {
 
 	@Autowired

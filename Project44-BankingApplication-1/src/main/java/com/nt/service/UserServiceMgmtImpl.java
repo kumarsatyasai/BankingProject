@@ -1,4 +1,7 @@
 package com.nt.service;
+
+
+
 import java.math.BigDecimal;    
 import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +11,7 @@ import com.nt.dto.BankResponse;
 import com.nt.dto.CreditDebitRequest;
 import com.nt.dto.EmailDetails;
 import com.nt.dto.EnquiryRequest;
+import com.nt.dto.TransactionDto;
 import com.nt.dto.TransferRequest;
 import com.nt.dto.UserRequest;
 import com.nt.entity.User;
@@ -22,6 +26,8 @@ public class UserServiceMgmtImpl implements IUserService {
 	
 	@Autowired
 	private IEmailService emailService;
+	
+	private ITransactionService transactionService;
 
 	@Override
 	public BankResponse createAccount(UserRequest userRequest) {
@@ -51,6 +57,7 @@ public class UserServiceMgmtImpl implements IUserService {
 				.status("ACTIVE")
 				.build();
 		User savedUser = userRepository.save(newUser);
+		
 		//Send Email Alert.
 		EmailDetails emailDetails = EmailDetails.builder()
 				.recipient(savedUser.getEmail())
@@ -142,6 +149,15 @@ public class UserServiceMgmtImpl implements IUserService {
 		User userToCredit = userRepository.findByAccountNumber(credetDebitRequest.getAccountNumber());
 		userToCredit.setAccountBalance(userToCredit.getAccountBalance().add(credetDebitRequest.getAmount()));
 		User creditedUser = userRepository.save(userToCredit);
+		
+		//Transaction Details
+		TransactionDto transactionDto = TransactionDto.builder()
+				.accountNumber(creditedUser.getAccountNumber())
+				.amount(credetDebitRequest.getAmount())
+				.transactionType("CREDIT")
+				.build();
+		transactionService.saveTransaction(transactionDto);
+		
 		//Send Email Alert.
 				EmailDetails emailDetails = EmailDetails.builder()
 						.recipient(creditedUser.getEmail())
@@ -208,6 +224,15 @@ public class UserServiceMgmtImpl implements IUserService {
 		}
 		userToDebit.setAccountBalance(userToDebit.getAccountBalance().subtract(credetDebitRequest.getAmount()));
 		User debitedUser = userRepository.save(userToDebit);
+		
+		//Transaction Details
+				TransactionDto transactionDto = TransactionDto.builder()
+						.accountNumber(debitedUser.getAccountNumber())
+						.amount(credetDebitRequest.getAmount())
+						.transactionType("Debit")
+						.build();
+				transactionService.saveTransaction(transactionDto);
+				
 		//Send Email Alert.
 		EmailDetails emailDetails = EmailDetails.builder()
 				.recipient(debitedUser.getEmail())
@@ -281,6 +306,15 @@ public class UserServiceMgmtImpl implements IUserService {
 		
 		sourceUser.setAccountBalance(sourceUser.getAccountBalance().subtract(transferRequest.getAmount()));
 		userRepository.save(sourceUser);
+		
+		//Transaction Details
+				TransactionDto transactionDto = TransactionDto.builder()
+						.accountNumber(sourceUser.getAccountNumber())
+						.amount(transferRequest.getAmount())
+						.transactionType("DEBIT")
+						.build();
+				transactionService.saveTransaction(transactionDto);
+				
 		//Send Email Alert.
 		EmailDetails emailDetails = EmailDetails.builder()
 				.recipient(sourceUser.getEmail())
@@ -304,6 +338,15 @@ public class UserServiceMgmtImpl implements IUserService {
 
 		destinationUser.setAccountBalance(destinationUser.getAccountBalance().add(transferRequest.getAmount()));
 		userRepository.save(destinationUser);
+		
+		//Transaction Details
+				TransactionDto transactionDto1 = TransactionDto.builder()
+						.accountNumber(destinationUser.getAccountNumber())
+						.amount(transferRequest.getAmount())
+						.transactionType("CREDIT")
+						.build();
+				transactionService.saveTransaction(transactionDto1);
+				
 		//Send Email Alert.
 		EmailDetails emailDetail = EmailDetails.builder()
 				.recipient(destinationUser.getEmail())
