@@ -27,6 +27,7 @@ public class UserServiceMgmtImpl implements IUserService {
 	@Autowired
 	private IEmailService emailService;
 	
+	@Autowired
 	private ITransactionService transactionService;
 
 	@Override
